@@ -2,6 +2,7 @@
 
 namespace Rennokki\Larafy\Traits;
 
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Rennokki\Larafy\Exceptions\SpotifyResponseException;
 
@@ -75,8 +76,16 @@ trait RequestTrait
             $this->refreshToken();
         }
 
+        $client = new Client([
+            'base_uri' => config('larafy.api_url'),
+            'headers' => [
+                'Content-Type' => 'application/x-www-form-urlencoded',
+                'Accepts' => 'application/json',
+            ],
+        ]);
+
         try {
-            $request = $this->apiClient->request($method, $endpoint, array_merge($options, [
+            $request = $client->request($method, $endpoint, array_merge($options, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->accessToken,
                 ],

@@ -3,6 +3,7 @@
 namespace Rennokki\Larafy\Traits;
 
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Rennokki\Larafy\Exceptions\SpotifyTokenException;
 
@@ -80,12 +81,19 @@ trait AuthTrait
     }
 
 
-    private function requestToken($params)
+    private function requestToken(array $params)
     {
+        $client = new Client([
+            'base_uri' => config('larafy.request_token_url'),
+            'headers' => [
+                'Content-Type' => 'application/x-www-form-urlencoded',
+                'Accepts' => 'application/json',
+                'Authorization' => 'Basic ' . base64_encode($this->clientId . ':' . $this->clientSecret),
+            ],
+        ]);
+
         try {
-            $request = $this->tokenClient->post('', [
-                'form_params' => $params,
-            ]);
+            $request =  $client->post('', ['form_params' => $params]);
         } catch (ClientException $e) {
             $response = $e->getResponse()->getBody()->getContents();
             $response = json_decode($response);
